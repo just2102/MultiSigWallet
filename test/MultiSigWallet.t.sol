@@ -6,8 +6,26 @@ import {MultiSigWallet} from "../src/MultiSigWallet.sol";
 
 contract MultiSigWalletTest is Test {
     MultiSigWallet public wallet;
+    address owner1 = makeAddr("owner1");
+    address owner2 = makeAddr("owner2");
+    address owner3 = makeAddr("owner3");
 
-    function setUp(address[] memory _owners, uint8 _numConfirmationsRequired) public {
-        wallet = new MultiSigWallet(_owners, _numConfirmationsRequired);
+    function setUp() public {
+        address[] memory owners = new address[](3);
+        owners[0] = owner1;
+        owners[1] = owner2;
+        owners[2] = owner3;
+        wallet = new MultiSigWallet(owners, 2);
+    }
+
+    function test_SubmitTransactionRevertWhen_NotAnOwner() public {
+        vm.expectRevert("Not an owner");
+        wallet.submitTransaction(address(this), 1 wei, bytes(""));
+    }
+
+    function test_SubmitTransaction() public {
+        vm.startPrank(owner1);
+        wallet.submitTransaction(address(this), 1 wei, bytes(""));
+        vm.stopPrank();
     }
 }
